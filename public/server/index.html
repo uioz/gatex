@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.mjs"></script>
+  <title>Server</title>
+</head>
+
+<body>
+  <p>环境选用</p>
+  <ul>
+    <% for (const key of appNames) { %>
+      <li>
+        <%= key %> <button data-key="<%= key %>">启用</button>
+      </li>
+      <% } %>
+  </ul>
+
+  <script type="module">
+    import Cookies from "https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.mjs";
+
+    document.querySelectorAll('button').forEach(item => item.addEventListener('click', () => {
+      // clear common session
+      document.cookie = '';
+      localStorage.clear();
+      sessionStorage.clear();
+      Cookies.set('gatex', item.dataset.key, {
+        expires: 365
+      });
+      window.location.assign('/');
+    }));
+  </script>
+</body>
+
+</html>

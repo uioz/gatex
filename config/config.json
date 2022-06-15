@@ -1,0 +1,10 @@
+{
+  "daemon": {
+    "port": 2793
+  },
+  "server": {
+    "port": 80,
+    "fallbackPrefix": "dev",
+    "portBottomLine": 3000
+  }
+}
