@@ -18,11 +18,15 @@ $env:NODE_ENV="production";node .\dist\daemon.mjs
 
 ## 日志记录
 
+只建议调试情况下使用, 这样做会大幅降低性能.
+
 ```pwsh
 $env:DEBUG="*";node .\dist\daemon.mjs
 ```
 
 # 配置文件
+
+配置文件存放在 `config` 目录下.
 
 ## config
 
@@ -41,7 +45,13 @@ $env:DEBUG="*";node .\dist\daemon.mjs
 
 ## manifest
 
-这个文件描述了 API 服务以及对应的地址, 在首次启动的情况下, 在配置完成 `config.server.fallbackPrefix` 后你需要在这里指定对应的地址, 这个环节也可以在守护进程提供的在线配置页面中完成:
+**注意**: 如果首次使用中需要手动配置此文件, 你需要手动建立此文件.
+
+这个文件描述了 API 服务以及对应的地址, 在首次启动的情况下, 在配置完成 `config.server.fallbackPrefix` 后你需要在这里指定对应的地址, 这个环节也可以在守护进程提供的在线配置页面中完成.
+
+在这个配置中, 键代表 API 标识, 值对应的是地址.
+
+例子:
 
 ```json
 {
