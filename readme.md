@@ -1,12 +1,91 @@
-# 前端没有对应的服务端环境, 转发到默认的服务
+# gatex
 
-# API 网关没有对应的环境, 则通过配置页面来配置对应的应用
+`gatex` 是基于注册的多对多流量转发服务器, 被设计用来在同一个地址下挂载多个 `web` 服务, 主要用于开发流程中实现环境隔离.
 
-# /etc/init/env.conf
+# 部署
 
-env NODE_ENV=production
+从本仓库中选择 tag 后进行克隆, 配置 `config/config.json` 文件后, 按照启动章节进行运行.
 
-# 环境命名规则
+# 启动
+
+启动需要环境变量, 下面给出的是基于 `powershell` 的配置, 其他平台需要自行替换.
+
+## 生产环境
+
+```pwsh
+$env:NODE_ENV="production";node .\dist\daemon.mjs
+```
+
+## 日志记录
+
+```pwsh
+$env:DEBUG="*";node .\dist\daemon.mjs
+```
+
+# 配置文件
+
+## config
+
+```json
+{
+  "daemon": {
+    "port": 2793 // 守护进程监听端口
+  },
+  "server": {
+    "port": 80, // 转发服务器端口
+    "fallbackPrefix": "dev", // api 服务回退标识
+    "portBottomLine": 3000 // 基于标识计算端口号时候的起始端口值
+  }
+}
+```
+
+## manifest
+
+这个文件描述了 API 服务以及对应的地址, 在首次启动的情况下, 在配置完成 `config.server.fallbackPrefix` 后你需要在这里指定对应的地址, 这个环节也可以在守护进程提供的在线配置页面中完成:
+
+```json
+{
+  "dev": "http://192.169.0.1:8080"
+}
+```
+
+# 工作方式
+
+守护进程会唤醒工作进程, 守护进程读取配置文件提供在线的配置页面, 当配置发生变化时重启工作进程服务器.
+
+工作进程服务器根据请求中携带的 `cookie` 来判断响应的**应用(app)**以及转发的**接口(app)**, 而转发的目的地是通过守护进程配置的.
+
+这个 `cookie` 不需要手动编辑, 格式如下:
+
+```
+完整语法:
+(<api>@<app channel>)|(<api>)
+
+无通道例子:
+dev
+test
+pre-release
+
+有通道例子:
+dev@bug-123
+test@office
+test@admin
+pre-release@next
+```
+
+无通道的情况下 `dev` 则同时代表 `app` 以及 `api` 的名字, 流量转发服务器会寻找名称为 `dev` 的 api 以及 app 将他们混合在一起然后转发.
+
+有通道的情况下 `pre-release@next` 其中 `pre-release` 表示 api 的名字, `pre-release@next` 则表示 app 的名字.
+
+给定一个标识例如 `test` 如果存在对应的 app 但是没有对应的 api 则会根据配置文件中 `config.server.fallbackPrefix` 指定的标识作为默认的 api.
+
+# 使用方式
+
+守护进程除了提供了一个配置页面外, 还提供了一组 `restful` API 以供脚本调用, 一般是结合代码托管工具使用, 在合适的时机调用 api 以及 app 的注册服务, 并在合适的时机调用 api 以及 app 的删除服务.
+
+在此期间便可以得到环境隔离的便利, 具体隔离的内容是由使用者决定的, 例如使用 git 来举例的话你甚至可以在一个提交中使用 `commit` 作为 app 的标识通过脚本等工具注册到 `gatex` 中.
+
+通过首次访问 `gatex` 流量转发服务器, 或者清空 `cookie`, 或者通过在 url 中添加 `?gatex=true` 的形式, 你可以在选择 app 页面中启用你需要的环境.
 
 ## API 服务
 
@@ -19,6 +98,17 @@ env NODE_ENV=production
 第二种情况使用 `@` 分割的字符串, `@` 之前的指代 API 服务, `@` 之后的指代应用.
 
 # API DOC
+
+[查看](https://www.apifox.cn/apidoc/shared-40615a01-d7e8-4761-bc74-215ad9f0ee7f)
+
+# 压力测试说明
+
+压力测试需要单独部署进行测试, 不然受到转发服务器的性能限制.
+
+# TODO
+
+- 保留分支与分支匹配模式支持配置文件配置
+- 基于分支的工作流放入 docs 目录
 
 ## API 服务仓库
 
@@ -37,84 +127,3 @@ env NODE_ENV=production
 ### 删除 (TODO)
 
 ## 重启 gatex (TODO)
-
-## 获取服务列表
-
-```
-GET /api/service
-```
-
-response:
-
-```
-[
-  {
-    label:'xxx',
-    url:'xxxx',
-    type:'api'
-  },
-  {
-    label:'xxx',
-    type:'app'
-  }
-]
-```
-
-## 添加 API 服务
-
-```
-POST /api/service/api/<prefix>?[url]
-
-// prefix 环境名称 (分支后缀)
-// url 服务地址, 可以不填写则使用来源IP, 如果不指定端口则通过 prefix 计算端口
-```
-
-## 添加 APP 服务
-
-```
-POST /api/service/app/<target>
-
-// target 应用名称
-
-BODY binary // zip 文件, 解压后至少包含一个 `index.html` 文件
-```
-
-## 克隆 APP 服务
-
-```
-POST /api/service/app/clone/<source>/<target>
-
-// source 克隆源, 必须是已有 APP 名称
-// target 克隆目标
-```
-
-## 删除 API 服务
-
-```
-DELETE /api/service/api/<target>
-
-// target api服务名称
-```
-
-## 删除 APP 服务
-
-```
-DELETE /api/service/app/<target>?[all]
-
-// target 应用名称
-// all boolean 表示是否删除对应前缀的所有的应用, 例如 `/api/service/app/dev?all=true` 删除 `dev@frontend` `dev@admin` 等.
-```
-
-# 压力测试说明
-
-压力测试需要单独部署进行测试, 不然受到转发服务器的性能限制.
-
-# TODO
-
-- 保留分支与分支匹配模式支持配置文件配置
-
-# 启动指令(旧)
-
-```
-node ./dist/server.mjs gitlab服务器地址@项目ip@项目token
-```

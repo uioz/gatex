@@ -1,6 +1,7 @@
 import { type Express } from "express";
 import { WWW_ROOT } from "../common/apps.mjs";
 import { join } from "path";
+import { log } from "./log.mjs";
 
 export function mountRedirect(app: Express) {
   app.use((req, res, next) => {
@@ -10,6 +11,8 @@ export function mountRedirect(app: Express) {
       req.url = `/${prefix}${req.url}`;
       return next();
     }
+
+    log(`${req.url} -> /${prefix}/index.html`);
 
     res.sendFile(join(WWW_ROOT, `/${prefix}/index.html`), {
       cacheControl: false,

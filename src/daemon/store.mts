@@ -13,16 +13,16 @@ export class Store {
   /**
    * 服务仓库所有可用分支后缀
    */
-  public remotePrefix: Array<string> = [];
+  // public remotePrefix: Array<string> = [];
 
   public flushManifest(manifest: Manifest) {
     return writeManifest((this.manifest = manifest));
   }
 
   public async init() {
-    const [manifest, remotePrefix] = await Promise.all([
+    const [manifest] = await Promise.all([
       readManifest(),
-      readApiPrefixFromRemoteBranches(),
+      // readApiPrefixFromRemoteBranches(),
     ]);
 
     // console.log(
@@ -39,6 +39,6 @@ export class Store {
     // );
 
     this.manifest = manifest;
-    this.remotePrefix = remotePrefix;
+    // this.remotePrefix = remotePrefix;
   }
 }

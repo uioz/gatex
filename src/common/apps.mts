@@ -3,6 +3,9 @@ import { type ReadStream } from "fs";
 import { readdir, cp, rm, mkdir } from "fs/promises";
 import { join } from "path";
 import { Extract } from "unzipper";
+import debug from "debug";
+
+const log = debug("AppManager");
 
 export const WWW_ROOT = join(cwd(), "./www");
 
@@ -32,6 +35,8 @@ export class AppManager {
       }
     }
     this.apps = new Set(await readAppNameFromHostDir());
+    log(this.apps);
+    log("init success");
   }
 
   async clone(source: string, target: string) {
@@ -60,7 +65,10 @@ export class AppManager {
         this.apps.add(target);
         resolve();
       });
-      stream.once("error", reject);
+      stream.once("error", (error) => {
+        log(error);
+        reject();
+      });
     });
   }
 }

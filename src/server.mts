@@ -7,6 +7,7 @@ import { loadConfig } from "./common/config.mjs";
 import { mountConfigPage } from "./server/configPage.mjs";
 import { mountApis } from "./server/api.mjs";
 import { mountRedirect } from "./server/redirect.mjs";
+import { log } from "./server/log.mjs";
 
 const APP_NAMES = await readAppNameFromHostDir();
 const MANIFEST = await readManifest();
@@ -33,6 +34,4 @@ for (const appName of APP_NAMES) {
   );
 }
 
-Server.listen(CONFIG.server.port, () =>
-  console.log(`gatex server is running!`)
-);
+Server.listen(CONFIG.server.port, () => log(`gatex server is running!`));

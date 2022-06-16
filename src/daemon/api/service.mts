@@ -22,8 +22,6 @@ export function mountService(
   app.get("/api/service", (req, res) => {
     const result: Array<ServiceItem> = [];
 
-    console.log("get");
-
     for (const label of appManager.apps) {
       result.push({
         label,

@@ -1,5 +1,8 @@
 import { execaNode, type ExecaChildProcess } from "execa";
 import { stderr, stdout, stdin } from "process";
+import debug from "debug";
+
+const log = debug('Worker');
 
 function createWorker() {
   const abortController = new AbortController();
@@ -33,7 +36,7 @@ export class Worker {
 
   public set state(v: State) {
     this.#state = v;
-    console.log(`worker is ${State[v]}`);
+    log(`worker is ${State[v]}`);
   }
 
   public start() {

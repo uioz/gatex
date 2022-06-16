@@ -1,6 +1,9 @@
 import { readFile, writeFile } from "fs/promises";
 import { cwd } from "process";
 import { join } from "path";
+import debug from "debug";
+
+const log = debug("ManifestManager");
 
 export interface Manifest {
   [key: string]: string;
@@ -40,11 +43,13 @@ export class ManifestManager {
     try {
       const manifest = await readManifest();
       this.manifest = manifest;
+      log("init success");
     } catch (error) {
       if ((error as any)?.code === "ENOENT") {
         const data = {};
         await writeManifest(data);
         this.manifest = data;
+        log("init success");
       } else {
         throw error;
       }
