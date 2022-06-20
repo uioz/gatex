@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](http://192.168.50.14:8081/zhaoxinbo/gatex/compare/v1.0.0...v1.1.0) (2022-06-20)
+
+
+### Features
+
+* API 服务透传可配置 ([0a260a2](http://192.168.50.14:8081/zhaoxinbo/gatex/commit/0a260a24b83dd0c7e7fa3512483b64b94e9cf0d0))
+
 ## 1.0.0 (2022-06-17)
 
 
