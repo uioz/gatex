@@ -6,7 +6,7 @@
 
 # 启动
 
-启动需要环境变量, 下面给出的是基于 `powershell` 的启动方式, 其他平台需要自行替换环境变量语法.
+启动需要配置临时环境变量, 下面给出的是基于 `powershell` 的语法, 其他平台需要自行替换为对应的语法.
 
 ## 生产环境
 
@@ -20,6 +20,22 @@ $env:NODE_ENV="production";node .\dist\daemon.mjs
 
 ```pwsh
 $env:DEBUG="*";node .\dist\daemon.mjs
+```
+
+## 启动参数(gitlab 支持)
+
+额外参数用于扫描 gitlab 仓库, 根据分支的命名规则, 来自动移除不需要的 `app` 和 `api` 服务, 扫描周期为每日一次, 不传入则不进行服务裁剪.
+
+参数由三个部分组成使用 `@` 作为分隔符:
+
+```
+<gitlab服务地址>@<项目ID>@<ACCESS_TOKEN>
+```
+
+例子:
+
+```
+$env:NODE_ENV="production";node .\dist\daemon.mjs http://192.168.0.1:8080@1234@xxxxx http://192.168.0.1:8080@2222@xxxxx
 ```
 
 # 配置文件
@@ -37,7 +53,7 @@ $env:DEBUG="*";node .\dist\daemon.mjs
     "port": 80, // 转发服务器端口
     "fallbackPrefix": "dev", // api 服务回退标识
     "portBottomLine": 3000, // 基于标识计算端口号时候的起始端口值
-    "passthroughPrefixes":["/api"] // 透传到 API 服务的路由前缀
+    "passthroughPrefixes": ["/api"] // 透传到 API 服务的路由前缀
   }
 }
 ```
@@ -106,6 +122,8 @@ pre-release@next
 
 # TODO
 
+- 支持 SSR APP
+- 引入项目的概念
 - 插件化的标识管理器
   - 事件通信机制
 - 服务注册时记录时间

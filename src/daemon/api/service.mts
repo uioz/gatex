@@ -3,7 +3,7 @@ import { ManifestManager } from "../../common/manifest.mjs";
 import { type AppManager } from "../../common/apps.mjs";
 import { type Config } from "../../common/config.mjs";
 import { Worker } from "../worker.mjs";
-import { prefixToPort } from "../../common/remote-branch.mjs";
+import { prefixToPort } from "../../common/prefixToPort.mjs";
 
 export function mountService(
   app: Express,

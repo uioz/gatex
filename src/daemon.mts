@@ -7,6 +7,7 @@ import { cwd } from "process";
 import { join } from "path";
 import { mountService } from "./daemon/api/service.mjs";
 import { log } from "./daemon/log.mjs";
+import { load } from "./daemon/driverLoader.mjs";
 
 const manifestManager = new ManifestManager();
 const worker = new Worker();
@@ -23,6 +24,8 @@ worker.start();
 const App = express();
 
 mountService(App, manifestManager, appManager, worker, CONFIG);
+
+load(appManager, manifestManager, worker);
 
 App.use(express.static(join(cwd(), "public/daemon")));
 

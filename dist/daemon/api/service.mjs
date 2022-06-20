@@ -1,4 +1,4 @@
-import { prefixToPort } from "../../common/remote-branch.mjs";
+import { prefixToPort } from "../../common/prefixToPort.mjs";
 export function mountService(app, manifestManager, appManager, worker, config) {
     app.get("/api/service", (req, res) => {
         const result = [];

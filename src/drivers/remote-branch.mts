@@ -1,12 +1,9 @@
-import { argv } from "process";
 import { request } from "undici";
-import { isValidPrefixName } from "./helper.mjs";
+import { isValidPrefixName } from "../common/helper.mjs";
 
-async function fetchBranches() {
+async function fetchBranch(target: string) {
+  const [HOST, PROJECT_ID, ACCESS_TOKEN] = target.split("@");
 
-  const params = argv.slice(2)[0];
-  const [HOST, PROJECT_ID, ACCESS_TOKEN] = params.split("@");
-  
   const { statusCode, body } = await request(
     `${HOST}/api/v4/projects/${PROJECT_ID}/repository/branches?private_token=${ACCESS_TOKEN}`
   );
@@ -18,8 +15,6 @@ async function fetchBranches() {
 
     const branchNames = responseData.map((item) => item.name);
 
-    console.log(branchNames);
-    
     return branchNames;
   } else {
     throw new Error("request to gitlab is failed!");
@@ -29,7 +24,7 @@ async function fetchBranches() {
 function filterBranchesName(names: Array<string>) {
   const reservedBranch = new Set(["pre-release", "dev"]);
 
-  const branchPrefix = ["feat/", "fix/", "refacor/", "perf/", "ci/", "build/"];
+  const branchPrefix = ["feat/", "fix/", "refacor/", "test/", "chore/", "build/"];
 
   const result: Array<string> = [];
 
@@ -54,17 +49,8 @@ function filterBranchesName(names: Array<string>) {
   return result;
 }
 
-export async function readApiPrefixFromRemoteBranches(): Promise<
-  Array<string>
-> {
-  return filterBranchesName(await fetchBranches());
-}
-
-export function prefixToPort(prefix: string, prefixBaseline = 0) {
-  return (
-    prefix
-      .split("")
-      .map((character) => character.charCodeAt(0))
-      .reduce((prev, next) => prev + next) + prefixBaseline
-  );
+export async function readApiPrefixFromRemoteBranch(
+  target: string
+): Promise<Array<string>> {
+  return filterBranchesName(await fetchBranch(target));
 }
