@@ -10,6 +10,7 @@ export interface Config {
     port: number;
     fallbackPrefix: string;
     portBottomLine: number;
+    passthroughPrefixes: Array<string>;
   };
 }
 

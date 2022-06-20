@@ -1,7 +1,7 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { log } from "./log.mjs";
 export function mountApis(app, manifest, config) {
-    app.use("/api", createProxyMiddleware({
+    app.use(config.server.passthroughPrefixes, createProxyMiddleware({
         ws: true,
         changeOrigin: true,
         router(req) {

@@ -5,6 +5,7 @@
   "server": {
     "port": 80,
     "fallbackPrefix": "dev",
-    "portBottomLine": 3000
+    "portBottomLine": 3000,
+    "passthroughPrefixes": ["/api"]
   }
 }

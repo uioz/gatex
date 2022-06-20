@@ -36,7 +36,8 @@ $env:DEBUG="*";node .\dist\daemon.mjs
   "server": {
     "port": 80, // 转发服务器端口
     "fallbackPrefix": "dev", // api 服务回退标识
-    "portBottomLine": 3000 // 基于标识计算端口号时候的起始端口值
+    "portBottomLine": 3000, // 基于标识计算端口号时候的起始端口值
+    "passthroughPrefixes":["/api"] // 透传到 API 服务的路由前缀
   }
 }
 ```
@@ -105,9 +106,9 @@ pre-release@next
 
 # TODO
 
-- API 前缀代理过滤
 - 插件化的标识管理器
   - 事件通信机制
+- 服务注册时记录时间
 - 保留分支与分支匹配模式支持配置文件配置
 - 基于分支的工作流放入 docs 目录
 

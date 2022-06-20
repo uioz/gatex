@@ -6,7 +6,7 @@ import { log } from "./log.mjs";
 
 export function mountApis(app: Express, manifest: Manifest, config: Config) {
   app.use(
-    "/api",
+    config.server.passthroughPrefixes,
     createProxyMiddleware({
       ws: true,
       changeOrigin: true,
