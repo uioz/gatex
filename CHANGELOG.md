@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](http://192.168.50.14:8081/zhaoxinbo/gatex/compare/v1.1.0...v1.2.0) (2022-06-20)
+
+
+### Features
+
+* 基于分支的服务裁剪支持 ([247ac0c](http://192.168.50.14:8081/zhaoxinbo/gatex/commit/247ac0c1daa1ee1bc89f0d3dc3f330a008cbd49c))
+
 ## [1.1.0](http://192.168.50.14:8081/zhaoxinbo/gatex/compare/v1.0.0...v1.1.0) (2022-06-20)
 
 
