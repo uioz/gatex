@@ -2,11 +2,16 @@ import { readFile, writeFile } from "fs/promises";
 import { cwd } from "process";
 import { join } from "path";
 import debug from "debug";
+import { Config } from "./config.mjs";
 
 const log = debug("ManifestManager");
 
 export interface Manifest {
-  [key: string]: string;
+  [project: string]: {
+    [api: string]: {
+      url: string;
+    };
+  };
 }
 
 export async function readManifest() {
@@ -24,6 +29,12 @@ export async function writeManifest(config: Manifest) {
   });
 }
 
+export function getFallbackUrl(config: Config, manifest: Manifest) {
+  const [project, prefix] = config.server.fallbackPrefix.split("@");
+
+  return () => manifest[project][prefix].url;
+}
+
 export class ManifestManager {
   /**
    * 服务配置
@@ -37,6 +48,28 @@ export class ManifestManager {
   public async flushManifest(manifest: Manifest) {
     await writeManifest(manifest);
     this.manifest = manifest;
+  }
+
+  public classifyManifest() {
+    const result: Array<{
+      label: string;
+      url: string;
+      project: string;
+      type: "api";
+    }> = [];
+
+    for (const [project, value] of Object.entries(this.manifest)) {
+      for (const [label, { url }] of Object.entries(value)) {
+        result.push({
+          project,
+          label,
+          url,
+          type: "api",
+        });
+      }
+    }
+
+    return result;
   }
 
   public async init() {
@@ -54,20 +87,39 @@ export class ManifestManager {
         throw error;
       }
     }
+  }
 
-    // console.log(
-    //   `store init -> prefixs from local file are ${Object.keys(manifest)}`
-    // );
+  public async update(project: string, api: string, payload: { url: string }) {
+    const temp = {
+      [api]: {
+        ...payload,
+        createdAt: Date.now(),
+      },
+    };
 
-    // for (const host of Object.keys(manifest)) {
-    //   if (remotePrefix.indexOf(host) === -1) {
-    //     delete manifest[host];
-    //   }
-    // }
-    // console.log(
-    //   `store init -> deduplicated prefixs are ${Object.keys(manifest)}`
-    // );
+    if (this.manifest[project]) {
+      Object.assign(this.manifest[project], temp);
+    } else {
+      this.manifest[project] = temp;
+    }
 
-    // this.remotePrefix = remotePrefix;
+    return this.flushManifest(this.manifest);
+  }
+
+  public async delete(project: string, api: string) {
+    delete this.manifest[project][api];
+    return this.flushManifest(this.manifest);
+  }
+
+  public getMainfestByProject(project: string) {
+    return this.manifest[project];
+  }
+
+  public getMainfest() {
+    return this.manifest;
+  }
+
+  public has(project: string, api: string) {
+    return !!this.manifest[project]?.[api];
   }
 }

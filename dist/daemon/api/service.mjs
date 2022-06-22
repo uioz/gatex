@@ -1,21 +1,10 @@
 import { prefixToPort } from "../../common/prefixToPort.mjs";
 export function mountService(app, manifestManager, appManager, worker, config) {
     app.get("/api/service", (req, res) => {
-        const result = [];
-        for (const label of appManager.apps) {
-            result.push({
-                label,
-                type: "app",
-            });
-        }
-        for (const [label, url] of Object.entries(manifestManager.manifest)) {
-            result.push({
-                label,
-                url,
-                type: "api",
-            });
-        }
-        res.json(result);
+        res.json([
+            ...appManager.classifyApp(),
+            ...manifestManager.classifyManifest(),
+        ]);
     });
     function isValidRequestQuery(data) {
         if (data && data.url) {
@@ -23,60 +12,63 @@ export function mountService(app, manifestManager, appManager, worker, config) {
         }
         return false;
     }
-    app.post("/api/service/api/:prefix", async (req, res) => {
-        const { prefix } = req.params;
-        const parsedUrl = new URL(isValidRequestQuery(req.query)
-            ? req.query.url
-            : `http://${req.ip}:${prefixToPort(prefix, config.server.portBottomLine)}`);
+    app.post("/api/service/api/:project/:prefix", async (req, res) => {
+        const { prefix, project } = req.params;
+        let parsedUrl;
         if (isValidRequestQuery(req.query)) {
-            if (parsedUrl.port.length === 0) {
-                parsedUrl.port =
-                    prefixToPort(prefix, config.server.portBottomLine) + "";
-            }
+            parsedUrl = new URL(req.query.url);
         }
-        await manifestManager.flushManifest({
-            ...manifestManager.manifest,
-            [prefix]: parsedUrl.toString(),
+        else {
+            const ip = req.ip.startsWith("::ffff:") ? req.ip.substring(7) : req.ip;
+            parsedUrl = new URL(`http://${ip}:${prefixToPort(prefix, config.server.portBottomLine) + ""}`);
+        }
+        await manifestManager.update(project, prefix, {
+            url: parsedUrl.toString(),
         });
         await worker.restart();
         return res.sendStatus(200);
     });
-    app.post("/api/service/app/:target", async (req, res) => {
-        const { target } = req.params;
-        await appManager.add(req, target);
+    app.post("/api/service/app/:project/:target", async (req, res) => {
+        const { target, project } = req.params;
+        await appManager.add(req, project, target);
         await worker.restart();
         res.sendStatus(200);
     });
     app.post("/api/service/app/clone/:source/:target", async (req, res) => {
         const { source, target } = req.params;
-        await appManager.clone(source, target);
-        await worker.restart();
+        try {
+            await appManager.clone(source, target);
+            await worker.restart();
+        }
+        catch (error) {
+            return res.sendStatus(500);
+        }
         res.sendStatus(200);
     });
-    app.delete("/api/service/api/:target", async (req, res) => {
-        const { target } = req.params;
-        if (target in manifestManager.manifest) {
-            delete manifestManager.manifest[target];
-            await manifestManager.flushManifest(manifestManager.manifest);
+    app.delete("/api/service/api/:project/:target", async (req, res) => {
+        const { project, target } = req.params;
+        if (manifestManager.has(project, target)) {
+            await manifestManager.delete(project, target);
             await worker.restart();
             return res.sendStatus(200);
         }
         return res.sendStatus(404);
     });
     function isValidDeleteQuery(data) {
-        return typeof data?.all === "boolean";
+        return data?.all === "true";
     }
-    app.delete("/api/service/app/:target", async (req, res) => {
-        const { target } = req.params;
+    app.delete("/api/service/app/:project/:target", async (req, res) => {
+        const { project, target } = req.params;
+        let deleted = false;
         if (isValidDeleteQuery(req.query)) {
-            await Promise.all(Array.from(appManager.apps)
-                .filter((appName) => appName.startsWith(target))
-                .map((appName) => appManager.delete(appName)));
-            await worker.restart();
-            return res.sendStatus(200);
+            await appManager.wildDelete(project, target);
+            deleted = true;
         }
-        if (appManager.apps.has(target)) {
-            await appManager.delete(target);
+        if (appManager.apps.has(`${project}@${target}`)) {
+            await appManager.delete(`${project}@${target}`);
+            deleted = true;
+        }
+        if (deleted) {
             await worker.restart();
             return res.sendStatus(200);
         }

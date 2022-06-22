@@ -15,6 +15,10 @@ export async function writeManifest(config) {
         flag: "w+",
     });
 }
+export function getFallbackUrl(config, manifest) {
+    const [project, prefix] = config.server.fallbackPrefix.split("@");
+    return () => manifest[project][prefix].url;
+}
 export class ManifestManager {
     /**
      * 服务配置
@@ -27,6 +31,20 @@ export class ManifestManager {
     async flushManifest(manifest) {
         await writeManifest(manifest);
         this.manifest = manifest;
+    }
+    classifyManifest() {
+        const result = [];
+        for (const [project, value] of Object.entries(this.manifest)) {
+            for (const [label, { url }] of Object.entries(value)) {
+                result.push({
+                    project,
+                    label,
+                    url,
+                    type: "api",
+                });
+            }
+        }
+        return result;
     }
     async init() {
         try {
@@ -45,17 +63,33 @@ export class ManifestManager {
                 throw error;
             }
         }
-        // console.log(
-        //   `store init -> prefixs from local file are ${Object.keys(manifest)}`
-        // );
-        // for (const host of Object.keys(manifest)) {
-        //   if (remotePrefix.indexOf(host) === -1) {
-        //     delete manifest[host];
-        //   }
-        // }
-        // console.log(
-        //   `store init -> deduplicated prefixs are ${Object.keys(manifest)}`
-        // );
-        // this.remotePrefix = remotePrefix;
+    }
+    async update(project, api, payload) {
+        const temp = {
+            [api]: {
+                ...payload,
+                createdAt: Date.now(),
+            },
+        };
+        if (this.manifest[project]) {
+            Object.assign(this.manifest[project], temp);
+        }
+        else {
+            this.manifest[project] = temp;
+        }
+        return this.flushManifest(this.manifest);
+    }
+    async delete(project, api) {
+        delete this.manifest[project][api];
+        return this.flushManifest(this.manifest);
+    }
+    getMainfestByProject(project) {
+        return this.manifest[project];
+    }
+    getMainfest() {
+        return this.manifest;
+    }
+    has(project, api) {
+        return !!this.manifest[project]?.[api];
     }
 }

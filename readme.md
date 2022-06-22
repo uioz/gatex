@@ -122,11 +122,13 @@ pre-release@next
 
 # TODO
 
-- 支持 SSR APP
 - 引入项目的概念
+  - next 更改 `app` `api` 换成数字 ID, 包括 `spa` `ssr` `api` 三种类型
+- 切换成 monorepo
 - 插件化的标识管理器
-  - 事件通信机制
+  - 提供 GUI 配置页面
 - 服务注册时记录时间
+- 支持 SSR APP
 - 保留分支与分支匹配模式支持配置文件配置
 - 基于分支的工作流放入 docs 目录
 

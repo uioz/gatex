@@ -2,7 +2,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import { readAppNameFromHostDir, joinName } from "./common/apps.mjs";
-import { readManifest } from "./common/manifest.mjs";
+import { readManifest, getFallbackUrl } from "./common/manifest.mjs";
 import { loadConfig } from "./common/config.mjs";
 import { mountConfigPage } from "./server/configPage.mjs";
 import { mountApis } from "./server/api.mjs";
@@ -19,7 +19,7 @@ Server.use(cookieParser());
 
 mountConfigPage(Server, APP_NAMES);
 
-mountApis(Server, MANIFEST, CONFIG);
+mountApis(Server, MANIFEST, CONFIG, getFallbackUrl(CONFIG, MANIFEST));
 
 mountRedirect(Server);
 
