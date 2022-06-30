@@ -110,3 +110,5 @@ www/
 
 # manifest.json
 config/manifest.json
+
+build/

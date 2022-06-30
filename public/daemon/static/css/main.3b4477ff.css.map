@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.3b4477ff.css","mappings":"AAAA,6BACE,aAAc,CACd,eACF","sources":["components/UploadButton/index.module.css"],"sourcesContent":[".Button{\n  display: block;\n  margin-top: 16px;\n}\n"],"names":[],"sourceRoot":""}

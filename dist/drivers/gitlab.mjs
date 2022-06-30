@@ -1,4 +1,4 @@
-import { readApiPrefixFromRemoteBranch } from "./remote-branch.mjs";
+import { readApiPrefixFromRemoteBranch } from './remote-branch.mjs';
 export default class Gitlab {
     manifestManager;
     appManager;
@@ -10,7 +10,7 @@ export default class Gitlab {
         this.appManager = appManager;
         this.worker = worker;
         this.debug = debug;
-        this.log = debug("gitlab");
+        this.log = debug('gitlab');
     }
     /**
      * "PROJECT_NAME@HOST@PROJECT_ID@ACCESS_TOKEN"
@@ -20,11 +20,11 @@ export default class Gitlab {
      */
     run(args) {
         if (args.length === 0) {
-            this.log("no args stop running");
+            this.log('no args stop running');
             return;
         }
         const map = new Map();
-        for (const [project, host, projectId, accessToken] of args.map((arg) => arg.split("@"))) {
+        for (const [project, host, projectId, accessToken] of args.map((arg) => arg.split('@'))) {
             const temp = {
                 host,
                 projectId,
@@ -35,15 +35,12 @@ export default class Gitlab {
             }
         }
         setInterval(async () => {
-            this.log("running");
+            this.log('running');
             const tasks = [];
             for (const [project, subs] of map.entries()) {
                 for (const { accessToken, host, projectId } of subs) {
                     tasks.push((async () => {
-                        return [
-                            project,
-                            await readApiPrefixFromRemoteBranch(host, projectId, accessToken),
-                        ];
+                        return [project, await readApiPrefixFromRemoteBranch(host, projectId, accessToken)];
                     })());
                 }
             }

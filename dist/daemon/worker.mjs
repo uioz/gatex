@@ -1,10 +1,10 @@
-import { execaNode } from "execa";
-import { stderr, stdout, stdin } from "process";
-import debug from "debug";
+import { execaNode } from 'execa';
+import { stderr, stdout, stdin } from 'process';
+import debug from 'debug';
 const log = debug('Worker');
 function createWorker() {
     const abortController = new AbortController();
-    const cprocess = execaNode("./dist/server.mjs", {
+    const cprocess = execaNode('./dist/server.mjs', {
         signal: abortController.signal,
         stderr,
         stdin,
@@ -35,7 +35,7 @@ export class Worker {
     start() {
         const { abortController, cprocess } = createWorker();
         this.state = State.start;
-        cprocess.once("spawn", () => (this.state = State.running));
+        cprocess.once('spawn', () => (this.state = State.running));
         this.#abortController = abortController;
         this.#cprocess = cprocess;
     }

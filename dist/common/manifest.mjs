@@ -1,22 +1,22 @@
-import { readFile, writeFile } from "fs/promises";
-import { cwd } from "process";
-import { join } from "path";
-import debug from "debug";
-const log = debug("ManifestManager");
+import { readFile, writeFile } from 'fs/promises';
+import { cwd } from 'process';
+import { join } from 'path';
+import debug from 'debug';
+const log = debug('ManifestManager');
 export async function readManifest() {
-    const data = await readFile(join(cwd(), "config/manifest.json"), {
-        encoding: "utf-8",
+    const data = await readFile(join(cwd(), 'config/manifest.json'), {
+        encoding: 'utf-8',
     });
     return JSON.parse(data);
 }
 export async function writeManifest(config) {
-    await writeFile(join(cwd(), "config/manifest.json"), JSON.stringify(config), {
-        encoding: "utf-8",
-        flag: "w+",
+    await writeFile(join(cwd(), 'config/manifest.json'), JSON.stringify(config), {
+        encoding: 'utf-8',
+        flag: 'w+',
     });
 }
 export function getFallbackUrl(config, manifest) {
-    const [project, prefix] = config.server.fallbackPrefix.split("@");
+    const [project, prefix] = config.server.fallbackPrefix.split('@');
     return () => manifest[project][prefix].url;
 }
 export class ManifestManager {
@@ -40,7 +40,7 @@ export class ManifestManager {
                     project,
                     label,
                     url,
-                    type: "api",
+                    type: 'api',
                 });
             }
         }
@@ -50,14 +50,14 @@ export class ManifestManager {
         try {
             const manifest = await readManifest();
             this.manifest = manifest;
-            log("init success");
+            log('init success');
         }
         catch (error) {
-            if (error?.code === "ENOENT") {
+            if (error?.code === 'ENOENT') {
                 const data = {};
                 await writeManifest(data);
                 this.manifest = data;
-                log("init success");
+                log('init success');
             }
             else {
                 throw error;
