@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](http://192.168.50.14:8081/zhaoxinbo/gatex/compare/v1.2.0...v2.0.0) (2022-07-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* 全面支持基于项目的流量转发
+
+### Features
+
+* 全面支持基于项目的流量转发 ([6843673](http://192.168.50.14:8081/zhaoxinbo/gatex/commit/68436733f7c7bc458859bd29d70bb6b445fbb70c))
+
 ## [1.2.0](http://192.168.50.14:8081/zhaoxinbo/gatex/compare/v1.1.0...v1.2.0) (2022-06-20)
 
 
