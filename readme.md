@@ -80,29 +80,25 @@ $env:NODE_ENV="production";node .\dist\daemon.mjs http://192.168.0.1:8080@1234@x
 
 工作进程服务器根据请求中携带的 `cookie` 来判断响应的**应用(app)**以及转发的**接口(api)**, 而转发的目的地是通过守护进程配置的.
 
-这个 `cookie` 不需要手动编辑, 格式如下:
+这个 `cookie` 不需要手动编辑, 它的格式如下:
 
 ```
 完整语法:
-(<api>@<app channel>)|(<api>)
+<projectName>@<API>[@channel]
 
 无通道例子:
-dev
-test
-pre-release
+projectName@dev
+projectName@test
+projectName@pre-release
 
 有通道例子:
-dev@bug-123
-test@office
-test@admin
-pre-release@next
+projectName@dev@bug-123
+projectName@test@office
+projectName@test@admin
+projectName@pre-release@next
 ```
 
-无通道的情况下 `dev` 则同时代表 `app` 以及 `api` 的名字, 流量转发服务器会寻找名称为 `dev` 的 api 以及 app 将他们混合在一起然后转发.
-
-有通道的情况下 `pre-release@next` 其中 `pre-release` 表示 api 的名字, `pre-release@next` 则表示 app 的名字.
-
-给定一个标识例如 `test` 如果存在对应的 app 但是没有对应的 api 则会根据配置文件中 `config.server.fallbackPrefix` 指定的标识作为默认的 api.
+![示意图](./docs/example.png)
 
 # 使用方式
 
@@ -123,7 +119,7 @@ pre-release@next
 # TODO
 
 - 服务注册时记录时间, 渲染使用时间降序排列
-- 支持配置不同项目的回退API标识, 最终使用 config.json 中的配置
+- 支持配置不同项目的回退 API 标识, 最终使用 config.json 中的配置
 - 支持 SSR APP
 - 更改 `app` `api` 换成数字 ID, 包括 `spa` `ssr` `api` 三种类型
 - 插件化的标识管理器
