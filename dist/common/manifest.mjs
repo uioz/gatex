@@ -20,17 +20,19 @@ export function getFallbackUrl(config, manifest) {
     return () => manifest[project][prefix].url;
 }
 export class ManifestManager {
+    portBaseline;
     /**
      * 服务配置
      */
     manifest = {};
-    /**
-     * 服务仓库所有可用分支后缀
-     */
-    // public remotePrefix: Array<string> = [];
+    usedPorts = [];
+    constructor(portBaseline) {
+        this.portBaseline = portBaseline;
+    }
     async flushManifest(manifest) {
         await writeManifest(manifest);
         this.manifest = manifest;
+        this.scanPorts();
     }
     classifyManifest() {
         const result = [];
@@ -46,10 +48,33 @@ export class ManifestManager {
         }
         return result;
     }
+    scanPorts() {
+        const temps = [];
+        for (const project of Object.keys(this.manifest)) {
+            for (const api of Object.keys(this.manifest[project])) {
+                const port = Number.parseInt(new URL(this.manifest[project][api].url).port) - this.portBaseline;
+                temps[port] = port;
+            }
+        }
+        this.usedPorts = temps;
+    }
+    getFreePort() {
+        const len = this.usedPorts.length;
+        let index = 0;
+        while (index < len) {
+            const result = this.usedPorts[index];
+            if (result === undefined) {
+                return index + this.portBaseline;
+            }
+            index++;
+        }
+        throw new Error('port exceeds');
+    }
     async init() {
         try {
             const manifest = await readManifest();
             this.manifest = manifest;
+            this.scanPorts();
             log('init success');
         }
         catch (error) {

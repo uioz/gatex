@@ -40,14 +40,15 @@ export class ManifestManager {
    * 服务配置
    */
   public manifest: Manifest = {};
-  /**
-   * 服务仓库所有可用分支后缀
-   */
-  // public remotePrefix: Array<string> = [];
+
+  public usedPorts: Array<number> = [];
+
+  constructor(private portBaseline: number) {}
 
   public async flushManifest(manifest: Manifest) {
     await writeManifest(manifest);
     this.manifest = manifest;
+    this.scanPorts();
   }
 
   public classifyManifest() {
@@ -72,10 +73,43 @@ export class ManifestManager {
     return result;
   }
 
+  private scanPorts() {
+    const temps: Array<number> = [];
+
+    for (const project of Object.keys(this.manifest)) {
+      for (const api of Object.keys(this.manifest[project])) {
+        const port =
+          Number.parseInt(new URL(this.manifest[project][api].url).port) - this.portBaseline;
+        temps[port] = port;
+      }
+    }
+
+    this.usedPorts = temps;
+  }
+
+  public getFreePort() {
+    const len = this.usedPorts.length;
+    let index = 0;
+
+    while (index < len) {
+      const result = this.usedPorts[index];
+
+      if (result === undefined) {
+        return index + this.portBaseline;
+      }
+
+      index++;
+    }
+
+    throw new Error('port exceeds');
+  }
+
   public async init() {
     try {
       const manifest = await readManifest();
+
       this.manifest = manifest;
+      this.scanPorts();
       log('init success');
     } catch (error) {
       if ((error as any)?.code === 'ENOENT') {

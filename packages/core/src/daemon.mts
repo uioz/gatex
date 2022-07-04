@@ -9,11 +9,12 @@ import {mountService} from './daemon/api/service.mjs';
 import {log} from './daemon/log.mjs';
 import {load} from './daemon/driverLoader.mjs';
 
-const manifestManager = new ManifestManager();
+const CONFIG = await loadConfig();
+const manifestManager = new ManifestManager(CONFIG.server.portBottomLine);
 const worker = new Worker();
 const appManager = new AppManager();
 
-const [CONFIG] = await Promise.all([loadConfig(), manifestManager.init(), appManager.init()]);
+await Promise.all([manifestManager.init(), appManager.init()]);
 
 worker.start();
 

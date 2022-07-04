@@ -1,4 +1,3 @@
-import { prefixToPort } from '../../common/prefixToPort.mjs';
 export function mountService(app, manifestManager, appManager, worker, config) {
     app.get('/api/service', (req, res) => {
         res.json([
@@ -20,7 +19,7 @@ export function mountService(app, manifestManager, appManager, worker, config) {
         }
         else {
             const ip = req.ip.startsWith('::ffff:') ? req.ip.substring(7) : req.ip;
-            parsedUrl = new URL(`http://${ip}:${prefixToPort(prefix, config.server.portBottomLine) + ''}`);
+            parsedUrl = new URL(`http://${ip}:${manifestManager.getFreePort()}`);
         }
         await manifestManager.update(project, prefix, {
             url: parsedUrl.toString(),

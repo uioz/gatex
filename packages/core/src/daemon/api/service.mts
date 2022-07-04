@@ -3,7 +3,6 @@ import {ManifestManager} from '../../common/manifest.mjs';
 import {type AppManager} from '../../common/apps.mjs';
 import {type Config} from '../../common/config.mjs';
 import {Worker} from '../worker.mjs';
-import {prefixToPort} from '../../common/prefixToPort.mjs';
 
 export function mountService(
   app: Express,
@@ -52,9 +51,7 @@ export function mountService(
     } else {
       const ip = req.ip.startsWith('::ffff:') ? req.ip.substring(7) : req.ip;
 
-      parsedUrl = new URL(
-        `http://${ip}:${prefixToPort(prefix, config.server.portBottomLine) + ''}`
-      );
+      parsedUrl = new URL(`http://${ip}:${manifestManager.getFreePort()}`);
     }
 
     await manifestManager.update(project, prefix, {
