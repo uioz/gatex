@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](///compare/v2.0.0...v2.1.0) (2022-07-04)
+
+
+### Features
+
+* API自动分配端口使用累计值 f4051df
+
 ## [2.0.0](http://192.168.50.14:8081/zhaoxinbo/gatex/compare/v1.2.0...v2.0.0) (2022-07-04)
 
 
